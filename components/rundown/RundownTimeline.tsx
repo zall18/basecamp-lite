@@ -1,18 +1,20 @@
 "use client";
 
 import React from "react";
-import { Clock, MessageSquare, Play, CheckCircle2 } from "lucide-react";
+import { Clock, MessageSquare, Play, CheckCircle2, Lock } from "lucide-react";
 import { useEventStore } from "@/lib/store/use-event-store";
 import { formatTime } from "@/lib/utils";
+import { getRolePermissions } from "@/lib/permissions";
 import { Button } from "@/components/ui/Button";
 
 export function RundownTimeline() {
-  const { event, setActiveRundownItem } = useEventStore();
+  const { event, setActiveRundownItem, userRole } = useEventStore();
+  const permissions = getRolePermissions(userRole);
   const rundowns = [...event.rundowns].sort((a, b) => a.order - b.order);
 
   return (
     <div className="space-y-3.5">
-      {rundowns.map((item, idx) => {
+      {rundowns.map((item) => {
         const isCurrent = item.isCurrent;
         return (
           <div
@@ -81,15 +83,21 @@ export function RundownTimeline() {
               {/* Action buttons */}
               <div className="flex items-center gap-2 self-end sm:self-start shrink-0">
                 {!isCurrent ? (
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setActiveRundownItem(item.id)}
-                    className="text-xs gap-1.5"
-                  >
-                    <Play className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>Jadikan Sesi Aktif</span>
-                  </Button>
+                  permissions.canManageRundown ? (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setActiveRundownItem(item.id)}
+                      className="text-xs gap-1.5"
+                    >
+                      <Play className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Jadikan Sesi Aktif</span>
+                    </Button>
+                  ) : (
+                    <span className="text-[10px] text-slate-500 flex items-center gap-1 px-2 py-1 rounded bg-slate-900 border border-white/5">
+                      <Lock className="w-3 h-3 text-slate-600" /> Wewenang Acara
+                    </span>
+                  )
                 ) : (
                   <span className="inline-flex items-center gap-1 text-xs text-emerald-400 font-medium px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
                     <CheckCircle2 className="w-3.5 h-3.5" /> Live On Stage

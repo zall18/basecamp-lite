@@ -8,6 +8,7 @@ import { KeyRound, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 import { Suspense } from "react";
+import { NotificationToast } from "@/components/ui/NotificationToast";
 
 export default function WorkspaceLayout({
   children,
@@ -80,6 +81,7 @@ export default function WorkspaceLayout({
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {children}
       </main>
+      <NotificationToast />
     </div>
   );
 }

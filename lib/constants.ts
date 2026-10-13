@@ -78,6 +78,69 @@ export const ITEM_STATUS_LABELS: Record<string, { label: string; badgeClass: str
   },
 };
 
+/**
+ * Mendapatkan konfigurasi label status yang kontekstual antara barang fisik dan konsumsi/makanan
+ */
+export function getItemStatusConfig(status: string, category: string = "") {
+  const isFood = category.toLowerCase().includes("konsumsi");
+
+  switch (status) {
+    case "NOT_PICKED_UP":
+      return {
+        label: isFood ? "Belum Diambil dari Vendor" : "Belum Diambil",
+        shortLabel: isFood ? "1. Belum Diambil" : "1. Belum",
+        badgeClass: "bg-slate-500/20 text-slate-300 border-slate-500/30",
+        step: 1,
+      };
+    case "ON_THE_WAY":
+      return {
+        label: isFood ? "Driver Menuju Lokasi Acara" : "Sedang Menuju Lokasi",
+        shortLabel: isFood ? "2. Menuju Lokasi" : "2. Menuju Lokasi",
+        badgeClass: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30 animate-pulse",
+        step: 2,
+      };
+    case "DELIVERED":
+      return {
+        label: isFood ? "Tiba di Tempat (Siap Dibagikan)" : "Tiba di Tempat (Sedang Digunakan)",
+        shortLabel: isFood ? "3. Siap Bagikan" : "3. Tiba di Tempat",
+        badgeClass: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+        step: 3,
+      };
+    case "RETURNED":
+      return {
+        label: isFood ? "Sudah Dibagikan ke Peserta" : "Sudah Dikembalikan",
+        shortLabel: isFood ? "4. Sudah Dibagikan" : "4. Sudah Dikembalikan",
+        badgeClass: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+        step: 4,
+      };
+    default:
+      return {
+        label: "Belum Diambil",
+        shortLabel: "Belum",
+        badgeClass: "bg-slate-500/20 text-slate-300 border-slate-500/30",
+        step: 1,
+      };
+  }
+}
+
+/**
+ * Format durasi detik menjadi teks ramah pengguna (misal: '12 menit 30 detik', '45 detik', '1 jam 15 menit')
+ */
+export function formatDurationHuman(totalSeconds: number): string {
+  if (totalSeconds <= 0) return "0 detik";
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  if (hours > 0) {
+    return `${hours} jam${minutes > 0 ? ` ${minutes} menit` : ""}`;
+  }
+  if (minutes > 0) {
+    return `${minutes} menit${seconds > 0 ? ` ${seconds} detik` : ""}`;
+  }
+  return `${seconds} detik`;
+}
+
 export const NUDGE_PRESETS = [
   {
     id: "coffee",

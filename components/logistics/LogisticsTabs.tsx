@@ -10,15 +10,20 @@ import {
   Phone,
   Image as ImageIcon,
   ChevronRight,
+  Lock,
 } from "lucide-react";
 import { useEventStore } from "@/lib/store/use-event-store";
-import { ITEM_STATUS_LABELS } from "@/lib/constants";
+import { getItemStatusConfig } from "@/lib/constants";
+import { getRolePermissions } from "@/lib/permissions";
 import { ItemStatus } from "@/types";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 
 export function LogisticsTabs() {
-  const { event, updateLogisticsStatus, uploadLogisticsProof } = useEventStore();
+  const { event, userRole, updateLogisticsStatus, uploadLogisticsProof } = useEventStore();
+  const permissions = getRolePermissions(userRole);
+  const canEdit = permissions.canManageLogistics;
+
   const [activeTab, setActiveTab] = useState<"gear" | "food" | "proof">("gear");
   const [selectedItemForProof, setSelectedItemForProof] = useState<string | null>(null);
   const [proofUrlInput, setProofUrlInput] = useState("");
@@ -28,6 +33,7 @@ export function LogisticsTabs() {
   const verifiedItems = event.logistics.filter((item) => Boolean(item.photoProof));
 
   const handleStatusChange = (itemId: string, newStatus: ItemStatus) => {
+    if (!canEdit) return;
     updateLogisticsStatus(itemId, newStatus);
   };
 
@@ -47,6 +53,17 @@ export function LogisticsTabs() {
 
   return (
     <div className="space-y-5">
+      {/* Role Permission Alert if Read-Only */}
+      {!canEdit && (
+        <div className="p-3 rounded-xl bg-slate-900/90 border border-white/10 text-xs text-slate-300 flex items-center gap-2.5">
+          <Lock className="w-4 h-4 text-amber-400 shrink-0" />
+          <span>
+            <strong className="text-amber-300">Mode Pantau Lapangan:</strong> Anda masuk dengan peran{" "}
+            <strong>{permissions.roleTitle}</strong>. Tombol update status inventaris dinonaktifkan demi keamanan.
+          </span>
+        </div>
+      )}
+
       {/* Tab Switcher */}
       <div className="flex items-center gap-2 border-b border-white/10 pb-2">
         <button
@@ -91,7 +108,7 @@ export function LogisticsTabs() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {gearItems.map((item) => {
             const pic = event.members.find((m) => m.id === item.picId);
-            const statusConfig = ITEM_STATUS_LABELS[item.status] || ITEM_STATUS_LABELS.NOT_PICKED_UP;
+            const statusConfig = getItemStatusConfig(item.status, item.category);
 
             return (
               <div
@@ -127,8 +144,11 @@ export function LogisticsTabs() {
                       (st) => (
                         <button
                           key={st}
+                          disabled={!canEdit}
                           onClick={() => handleStatusChange(item.id, st)}
-                          className={`text-[10px] px-2 py-1 rounded-lg border transition-all cursor-pointer ${
+                          className={`text-[10px] px-2 py-1 rounded-lg border transition-all ${
+                            !canEdit ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
+                          } ${
                             item.status === st
                               ? "bg-violet-600 text-white border-violet-400 font-bold"
                               : "bg-slate-900/60 text-slate-400 border-white/5 hover:text-white"
@@ -144,11 +164,14 @@ export function LogisticsTabs() {
                   </div>
 
                   <button
+                    disabled={!canEdit}
                     onClick={() => {
                       setSelectedItemForProof(item.id);
                       setProofUrlInput(item.photoProof || "");
                     }}
-                    className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 cursor-pointer"
+                    className={`inline-flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 ${
+                      !canEdit ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
+                    }`}
                   >
                     <Camera className="w-3.5 h-3.5" />
                     <span>{item.photoProof ? "Lihat/Ubah Foto" : "Unggah Bukti"}</span>
@@ -165,7 +188,7 @@ export function LogisticsTabs() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {foodItems.map((item) => {
             const pic = event.members.find((m) => m.id === item.picId);
-            const statusConfig = ITEM_STATUS_LABELS[item.status] || ITEM_STATUS_LABELS.NOT_PICKED_UP;
+            const statusConfig = getItemStatusConfig(item.status, item.category);
 
             return (
               <div
@@ -200,8 +223,11 @@ export function LogisticsTabs() {
                       (st) => (
                         <button
                           key={st}
+                          disabled={!canEdit}
                           onClick={() => handleStatusChange(item.id, st)}
-                          className={`text-[10px] py-1.5 px-1 rounded-lg border text-center transition-all cursor-pointer font-medium ${
+                          className={`text-[10px] py-1.5 px-1 rounded-lg border text-center transition-all font-medium ${
+                            !canEdit ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
+                          } ${
                             item.status === st
                               ? "bg-pink-600 text-white border-pink-400 shadow-sm"
                               : "bg-slate-900/60 text-slate-400 border-white/5 hover:text-white"
@@ -261,11 +287,14 @@ export function LogisticsTabs() {
                   <span className="text-[10px] font-mono text-slate-400">{item.category}</span>
                   <h4 className="text-sm font-bold text-white mt-0.5">{item.name}</h4>
                   <button
+                    disabled={!canEdit}
                     onClick={() => {
                       setSelectedItemForProof(item.id);
                       setProofUrlInput(item.photoProof || "");
                     }}
-                    className="mt-3 text-xs text-cyan-400 hover:text-cyan-300 font-medium inline-flex items-center gap-1 cursor-pointer"
+                    className={`mt-3 text-xs text-cyan-400 hover:text-cyan-300 font-medium inline-flex items-center gap-1 ${
+                      !canEdit ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
+                    }`}
                   >
                     Ganti Foto Serah Terima <ChevronRight className="w-3 h-3" />
                   </button>

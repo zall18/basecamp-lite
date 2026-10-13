@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import {
   Calendar,
@@ -11,14 +11,27 @@ import {
   Shield,
   HelpCircle,
   Radio,
+  Sparkles,
 } from "lucide-react";
 import { useEventStore } from "@/lib/store/use-event-store";
 import { formatDate, formatTime } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
+import { NowPlayingBar } from "@/components/rundown/NowPlayingBar";
 
 export default function PublicEventHubPage() {
   const { event } = useEventStore();
   const rundowns = [...event.rundowns].sort((a, b) => a.order - b.order);
+
+  // Cross-tab real-time sync with organizer changes
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "basecamp-lite-event-store") {
+        useEventStore.persist?.rehydrate();
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#0B0D13] text-slate-100 flex flex-col">
@@ -34,17 +47,26 @@ export default function PublicEventHubPage() {
             </span>
           </div>
 
-          <Link href={`/workspace/${event.slug}`}>
-            <Button variant="secondary" size="sm" className="text-xs font-semibold gap-1.5">
-              <Shield className="w-3.5 h-3.5 text-violet-400" />
-              <span>Login Panitia</span>
-            </Button>
-          </Link>
+          <div className="flex items-center gap-3">
+            <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+              Live Synced
+            </span>
+            <Link href={`/workspace/${event.slug}`}>
+              <Button variant="secondary" size="sm" className="text-xs font-semibold gap-1.5">
+                <Shield className="w-3.5 h-3.5 text-violet-400" />
+                <span>Login Panitia</span>
+              </Button>
+            </Link>
+          </div>
         </div>
       </header>
 
       {/* Main Container */}
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-8 space-y-8">
+      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-8 space-y-6">
+        {/* Live Active Session Bar */}
+        <NowPlayingBar isPublicView={true} />
+
         {/* Hero Section */}
         <div className="glass-card rounded-3xl p-6 sm:p-8 border border-violet-500/30 bg-gradient-to-b from-violet-950/30 to-slate-900/60 relative overflow-hidden">
           <div className="flex items-center gap-2 mb-3">

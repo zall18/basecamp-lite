@@ -75,6 +75,16 @@ export interface SosAlert {
   createdAt: Date | string;
 }
 
+export interface InAppNotification {
+  id: string;
+  title: string;
+  message: string;
+  senderName: string;
+  timestamp: Date | string;
+  read: boolean;
+  type: "nudge" | "sos" | "rundown" | "logistics";
+}
+
 export interface EventData {
   id: string;
   slug: string;

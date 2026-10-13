@@ -166,8 +166,8 @@ export const INITIAL_DEMO_EVENT: EventData = {
       assigneeId: "mbr-dimas",
       status: "DONE",
       deadline: "2026-10-15T08:00:00.000Z",
-      lastNudgeAt: "2026-10-15T07:30:00.000Z",
-      lastNudgeBy: "Rian (Lead)",
+      lastNudgeAt: null,
+      lastNudgeBy: null,
     },
     {
       id: "tsk-2",
@@ -176,8 +176,8 @@ export const INITIAL_DEMO_EVENT: EventData = {
       assigneeId: "mbr-dimas",
       status: "IN_PROGRESS",
       deadline: "2026-10-15T08:45:00.000Z",
-      lastNudgeAt: "2026-10-15T08:15:00.000Z",
-      lastNudgeBy: "Rian (Lead)",
+      lastNudgeAt: null,
+      lastNudgeBy: null,
     },
     {
       id: "tsk-3",
