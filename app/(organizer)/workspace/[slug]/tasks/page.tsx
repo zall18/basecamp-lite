@@ -8,11 +8,28 @@ import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 
 export default function TasksPage() {
-  const { event } = useEventStore();
+  const { event, addTask } = useEventStore();
   const [filterDivision, setFilterDivision] = useState<string>("ALL");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [taskTitle, setTaskTitle] = useState("");
   const [assigneeId, setAssigneeId] = useState("");
+  const [taskStatus, setTaskStatus] = useState<"TODO" | "IN_PROGRESS" | "BLOCKED" | "DONE">("TODO");
+
+  const handleAddTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!taskTitle.trim()) return;
+
+    addTask({
+      title: taskTitle.trim(),
+      assigneeId: assigneeId || undefined,
+      status: taskStatus,
+    });
+
+    setTaskTitle("");
+    setAssigneeId("");
+    setTaskStatus("TODO");
+    setIsAddModalOpen(false);
+  };
 
   const filteredTasks = event.tasks.filter((task) => {
     if (filterDivision === "ALL") return true;
@@ -39,23 +56,35 @@ export default function TasksPage() {
           </p>
         </div>
 
-        {/* Division Filter */}
-        <div className="flex items-center gap-2">
-          <Filter className="w-3.5 h-3.5 text-slate-400" />
-          <select
-            value={filterDivision}
-            onChange={(e) => setFilterDivision(e.target.value)}
-            aria-label="Filter berdasarkan divisi panitia"
-            className="text-xs bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-violet-500 cursor-pointer"
+        {/* Action Button & Division Filter */}
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setIsAddModalOpen(true)}
+            className="gap-1.5 font-bold"
           >
-            <option value="ALL">Semua Divisi</option>
-            <option value="LEAD">BPH (Ketua)</option>
-            <option value="STAGE_EVENT">Divisi Acara</option>
-            <option value="LOGISTICS">Logistik & Perlengkapan</option>
-            <option value="CONSUMPTION">Konsumsi</option>
-            <option value="MEDIA_DOCS">PDD & Dokumentasi</option>
-            <option value="PUBLIC_RELATIONS">Humas & Medpar</option>
-          </select>
+            <Plus className="w-4 h-4" />
+            <span>Tambah Tugas</span>
+          </Button>
+
+          <div className="flex items-center gap-1.5">
+            <Filter className="w-3.5 h-3.5 text-slate-400" />
+            <select
+              value={filterDivision}
+              onChange={(e) => setFilterDivision(e.target.value)}
+              aria-label="Filter berdasarkan divisi panitia"
+              className="text-xs bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-violet-500 cursor-pointer"
+            >
+              <option value="ALL">Semua Divisi</option>
+              <option value="LEAD">BPH (Ketua)</option>
+              <option value="STAGE_EVENT">Divisi Acara</option>
+              <option value="LOGISTICS">Logistik & Perlengkapan</option>
+              <option value="CONSUMPTION">Konsumsi</option>
+              <option value="MEDIA_DOCS">PDD & Dokumentasi</option>
+              <option value="PUBLIC_RELATIONS">Humas & Medpar</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -137,6 +166,85 @@ export default function TasksPage() {
           </div>
         </div>
       </div>
+
+      {/* Modal Add Task */}
+      <Modal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        title="➕ Tambah Tugas Operasional Baru"
+        description="Buat checklist tugas hari-H dan delegasikan langsung ke anggota panitia."
+      >
+        <form onSubmit={handleAddTask} className="space-y-4 pt-1">
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">
+              Judul Tugas <span className="text-rose-400">*</span>
+            </label>
+            <input
+              type="text"
+              required
+              value={taskTitle}
+              onChange={(e) => setTaskTitle(e.target.value)}
+              placeholder="Contoh: Briefing Tim Konsumsi & Driver Katering"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white text-sm focus:outline-none focus:border-violet-500"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
+                PIC / Penanggung Jawab
+              </label>
+              <select
+                value={assigneeId}
+                onChange={(e) => setAssigneeId(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:outline-none focus:border-violet-500 cursor-pointer"
+              >
+                <option value="">-- Pilih Anggota Panitia --</option>
+                {event.members.map((member) => (
+                  <option key={member.id} value={member.id}>
+                    {member.name} ({member.role})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
+                Status Awal
+              </label>
+              <select
+                value={taskStatus}
+                onChange={(e) => setTaskStatus(e.target.value as any)}
+                className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:outline-none focus:border-violet-500 cursor-pointer"
+              >
+                <option value="TODO">Belum Dimulai</option>
+                <option value="IN_PROGRESS">Sedang Dikerjakan</option>
+                <option value="BLOCKED">Ada Kendala</option>
+                <option value="DONE">Selesai</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
+            <Button
+              variant="ghost"
+              size="sm"
+              type="button"
+              onClick={() => setIsAddModalOpen(false)}
+            >
+              Batal
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              type="submit"
+              className="gap-1.5 font-bold"
+            >
+              <span>Simpan Tugas</span>
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

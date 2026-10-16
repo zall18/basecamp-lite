@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Clock,
   Package,
@@ -11,22 +12,107 @@ import {
   FileText,
   ArrowRight,
   Sparkles,
+  Settings,
+  Plus,
+  RotateCcw,
+  Calendar,
+  MapPin,
+  KeyRound,
 } from "lucide-react";
 import { NowPlayingBar } from "@/components/rundown/NowPlayingBar";
 import { WifiCredentialCard } from "@/components/assets/WifiCredentialCard";
 import { useEventStore } from "@/lib/store/use-event-store";
 import { TaskCard } from "@/components/tasks/TaskCard";
 import { MemberCard } from "@/components/members/MemberCard";
+import { Button } from "@/components/ui/Button";
+import { EditEventModal } from "@/components/event/EditEventModal";
+import { CreateEventModal } from "@/components/event/CreateEventModal";
+import { formatDate } from "@/lib/utils";
 
 export default function WorkspaceOverviewPage() {
-  const { event } = useEventStore();
+  const router = useRouter();
+  const { event, resetToDemoEvent } = useEventStore();
   const slug = event.slug;
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const pendingTasks = event.tasks.filter((t) => t.status !== "DONE").slice(0, 3);
   const keyMembers = event.members.slice(0, 3);
 
+  const handleResetDemo = () => {
+    if (confirm("Kembalikan ke data demo 'Tech Talk & Hackathon 2026'?")) {
+      resetToDemoEvent();
+      router.push("/workspace/tech-talk-hackathon-2026");
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {/* 0. Event Management Header Bar */}
+      <div className="glass-card rounded-2xl p-4 sm:p-5 border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900/90 via-slate-900/60 to-violet-950/30">
+        <div>
+          <div className="flex items-center gap-2 flex-wrap mb-1">
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-violet-500/20 text-violet-300 border border-violet-500/30">
+              BASECAMP KONTROL
+            </span>
+            <span className="text-xs text-slate-400 font-mono flex items-center gap-1">
+              <Calendar className="w-3 h-3 text-cyan-400" />
+              {formatDate(event.date)}
+            </span>
+            {event.location && (
+              <span className="text-xs text-slate-400 flex items-center gap-1">
+                <MapPin className="w-3 h-3 text-amber-400" />
+                {event.location}
+              </span>
+            )}
+          </div>
+          <h1 className="text-lg sm:text-xl font-black text-white">
+            {event.title}
+          </h1>
+          {event.description && (
+            <p className="text-xs text-slate-300 mt-0.5 line-clamp-1 max-w-2xl">
+              {event.description}
+            </p>
+          )}
+        </div>
+
+        {/* Action Controls */}
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setIsEditModalOpen(true)}
+            className="text-xs font-semibold gap-1.5"
+            title="Edit judul, tanggal, lokasi venue, Wi-Fi, dan PIN acara"
+          >
+            <Settings className="w-3.5 h-3.5 text-violet-400" />
+            <span>Edit Info Acara</span>
+          </Button>
+
+          <Button
+            variant="cyan"
+            size="sm"
+            onClick={() => setIsCreateModalOpen(true)}
+            className="text-xs font-bold gap-1.5"
+            title="Buat acara baru untuk kegiatan Anda sendiri"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Buat Acara Baru</span>
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleResetDemo}
+            className="text-xs text-slate-400 hover:text-white p-2"
+            title="Kembalikan ke data demo bawaan"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+          </Button>
+        </div>
+      </div>
+
       {/* 1. Live Now Playing Stage Bar */}
       <NowPlayingBar />
 
@@ -122,6 +208,16 @@ export default function WorkspaceOverviewPage() {
           </div>
         </div>
       </div>
+
+      {/* Edit & Create Event Modals */}
+      <EditEventModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+      />
+      <CreateEventModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      />
     </div>
   );
 }

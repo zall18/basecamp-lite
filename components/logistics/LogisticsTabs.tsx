@@ -18,15 +18,29 @@ import { getRolePermissions } from "@/lib/permissions";
 import { ItemStatus } from "@/types";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
+import { Trash2, Plus } from "lucide-react";
 
 export function LogisticsTabs() {
-  const { event, userRole, updateLogisticsStatus, uploadLogisticsProof } = useEventStore();
+  const {
+    event,
+    userRole,
+    updateLogisticsStatus,
+    uploadLogisticsProof,
+    addLogisticsItem,
+    deleteLogisticsItem,
+  } = useEventStore();
   const permissions = getRolePermissions(userRole);
   const canEdit = permissions.canManageLogistics;
 
   const [activeTab, setActiveTab] = useState<"gear" | "food" | "proof">("gear");
   const [selectedItemForProof, setSelectedItemForProof] = useState<string | null>(null);
   const [proofUrlInput, setProofUrlInput] = useState("");
+
+  // Add Item Modal State
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newItemName, setNewItemName] = useState("");
+  const [newItemCategory, setNewItemCategory] = useState("Elektronik / Alat");
+  const [newItemVendorPhone, setNewItemVendorPhone] = useState("");
 
   const gearItems = event.logistics.filter((item) => item.category !== "Konsumsi");
   const foodItems = event.logistics.filter((item) => item.category === "Konsumsi");
@@ -42,6 +56,28 @@ export function LogisticsTabs() {
       uploadLogisticsProof(selectedItemForProof, proofUrlInput.trim());
       setProofUrlInput("");
       setSelectedItemForProof(null);
+    }
+  };
+
+  const handleAddItem = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newItemName.trim()) return;
+
+    addLogisticsItem({
+      name: newItemName.trim(),
+      category: newItemCategory,
+      status: "NOT_PICKED_UP",
+      vendorPhone: newItemVendorPhone.trim() || undefined,
+    });
+
+    setNewItemName("");
+    setNewItemVendorPhone("");
+    setIsAddModalOpen(false);
+  };
+
+  const handleDeleteItem = (itemId: string, itemName: string) => {
+    if (confirm(`Hapus "${itemName}" dari daftar logistik?`)) {
+      deleteLogisticsItem(itemId);
     }
   };
 
@@ -64,43 +100,57 @@ export function LogisticsTabs() {
         </div>
       )}
 
-      {/* Tab Switcher */}
-      <div className="flex items-center gap-2 border-b border-white/10 pb-2">
-        <button
-          onClick={() => setActiveTab("gear")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-            activeTab === "gear"
-              ? "bg-violet-600/30 text-violet-300 border border-violet-500/40 shadow-sm"
-              : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
-          }`}
-        >
-          <Package className="w-4 h-4" />
-          <span>Perlengkapan Fisik & Alat ({gearItems.length})</span>
-        </button>
+      {/* Tab Switcher & Add Item Button */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-2">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
+          <button
+            onClick={() => setActiveTab("gear")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 cursor-pointer ${
+              activeTab === "gear"
+                ? "bg-violet-600/30 text-violet-300 border border-violet-500/40 shadow-sm"
+                : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+            }`}
+          >
+            <Package className="w-4 h-4" />
+            <span>Alat & Pinjaman ({gearItems.length})</span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab("food")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-            activeTab === "food"
-              ? "bg-pink-600/30 text-pink-300 border border-pink-500/40 shadow-sm"
-              : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
-          }`}
-        >
-          <Utensils className="w-4 h-4" />
-          <span>Konsumsi & Vendor ({foodItems.length})</span>
-        </button>
+          <button
+            onClick={() => setActiveTab("food")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 cursor-pointer ${
+              activeTab === "food"
+                ? "bg-pink-600/30 text-pink-300 border border-pink-500/40 shadow-sm"
+                : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+            }`}
+          >
+            <Utensils className="w-4 h-4" />
+            <span>Konsumsi & Katering ({foodItems.length})</span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab("proof")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-            activeTab === "proof"
-              ? "bg-cyan-600/30 text-cyan-300 border border-cyan-500/40 shadow-sm"
-              : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
-          }`}
-        >
-          <Camera className="w-4 h-4" />
-          <span>Bukti Serah Terima ({verifiedItems.length})</span>
-        </button>
+          <button
+            onClick={() => setActiveTab("proof")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 cursor-pointer ${
+              activeTab === "proof"
+                ? "bg-cyan-600/30 text-cyan-300 border border-cyan-500/40 shadow-sm"
+                : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+            }`}
+          >
+            <Camera className="w-4 h-4" />
+            <span>Bukti Serah Terima ({verifiedItems.length})</span>
+          </button>
+        </div>
+
+        {canEdit && (
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setIsAddModalOpen(true)}
+            className="text-xs font-bold gap-1.5 self-start sm:self-auto shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Tambah Barang / Konsumsi</span>
+          </Button>
+        )}
       </div>
 
       {/* Tab 1: Gear & Tools */}
@@ -120,11 +170,23 @@ export function LogisticsTabs() {
                     <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-white/5">
                       {item.category}
                     </span>
-                    <span
-                      className={`text-xs px-2.5 py-0.5 rounded-full font-medium border ${statusConfig.badgeClass}`}
-                    >
-                      {statusConfig.label}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className={`text-xs px-2.5 py-0.5 rounded-full font-medium border ${statusConfig.badgeClass}`}
+                      >
+                        {statusConfig.label}
+                      </span>
+                      {canEdit && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteItem(item.id, item.name)}
+                          className="p-1 rounded text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                          title="Hapus Barang"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <h3 className="text-base font-bold text-white mt-2 leading-snug">
                     {item.name}
@@ -200,11 +262,23 @@ export function LogisticsTabs() {
                     <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-pink-950/40 text-pink-300 border border-pink-500/20">
                       Konsumsi Acara
                     </span>
-                    <span
-                      className={`text-xs px-2.5 py-0.5 rounded-full font-medium border ${statusConfig.badgeClass}`}
-                    >
-                      {statusConfig.label}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className={`text-xs px-2.5 py-0.5 rounded-full font-medium border ${statusConfig.badgeClass}`}
+                      >
+                        {statusConfig.label}
+                      </span>
+                      {canEdit && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteItem(item.id, item.name)}
+                          className="p-1 rounded text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                          title="Hapus Konsumsi"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <h3 className="text-base font-bold text-white mt-2 leading-snug">
                     {item.name}
@@ -371,6 +445,80 @@ export function LogisticsTabs() {
             </Button>
           </div>
         </div>
+      </Modal>
+
+      {/* Modal Add Logistics Item */}
+      <Modal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        title="➕ Tambah Barang / Konsumsi Acara"
+        description="Masukkan perlengkapan fisik pinjaman atau pesanan katering untuk dipantau statusnya di hari-H."
+      >
+        <form onSubmit={handleAddItem} className="space-y-4 pt-1">
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">
+              Nama Barang / Menu Konsumsi <span className="text-rose-400">*</span>
+            </label>
+            <input
+              type="text"
+              required
+              value={newItemName}
+              onChange={(e) => setNewItemName(e.target.value)}
+              placeholder="Contoh: Kabel HDMI 10m / Snack Box Katering 100 Porsi"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white text-sm focus:outline-none focus:border-violet-500"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
+                Kategori
+              </label>
+              <select
+                value={newItemCategory}
+                onChange={(e) => setNewItemCategory(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:outline-none focus:border-violet-500 cursor-pointer"
+              >
+                <option value="Elektronik / Alat">Elektronik / Alat</option>
+                <option value="Pinjaman Kampus">Pinjaman Kampus</option>
+                <option value="Konsumsi">Konsumsi / Katering</option>
+                <option value="Perlengkapan">Perlengkapan & Dekorasi</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
+                No. WhatsApp Vendor / PIC
+              </label>
+              <input
+                type="tel"
+                value={newItemVendorPhone}
+                onChange={(e) => setNewItemVendorPhone(e.target.value)}
+                placeholder="+6281234567890"
+                className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-violet-500"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
+            <Button
+              variant="ghost"
+              size="sm"
+              type="button"
+              onClick={() => setIsAddModalOpen(false)}
+            >
+              Batal
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              type="submit"
+              className="gap-1.5 font-bold"
+            >
+              <span>Simpan Barang</span>
+            </Button>
+          </div>
+        </form>
       </Modal>
     </div>
   );

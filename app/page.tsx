@@ -16,36 +16,13 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { Modal } from "@/components/ui/Modal";
+import { CreateEventModal } from "@/components/event/CreateEventModal";
 import { useEventStore } from "@/lib/store/use-event-store";
 
 export default function LandingPage() {
   const router = useRouter();
-  const { updateEventDetails, event } = useEventStore();
+  const { event } = useEventStore();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [eventTitle, setEventTitle] = useState("");
-  const [eventDate, setEventDate] = useState("");
-  const [passcode, setPasscode] = useState("260426");
-
-  const handleCreateEvent = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!eventTitle.trim()) return;
-
-    const slug = eventTitle
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)+/g, "");
-
-    updateEventDetails({
-      title: eventTitle.trim(),
-      slug: slug || "acara-baru",
-      passcode: passcode.trim() || "123456",
-      date: eventDate ? new Date(eventDate) : new Date(),
-    });
-
-    setIsCreateOpen(false);
-    router.push(`/workspace/${slug || "acara-baru"}`);
-  };
 
   return (
     <div className="min-h-screen bg-[#0B0D13] text-slate-100 flex flex-col selection:bg-violet-500 selection:text-white">
@@ -201,68 +178,11 @@ export default function LandingPage() {
         Basecamp Lite — Dirancang untuk Komunitas Mahasiswa & Non-Corporate Tech Events.
       </footer>
 
-      {/* Modal Quick Event Creation (< 90s) */}
-      <Modal
+      {/* Modal Comprehensive Event Creation */}
+      <CreateEventModal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
-        title="🚀 Buat Basecamp Acara Baru"
-        description="Buat ruang kerja panitia dalam < 90 detik. Langsung bagikan tautan ke tim Anda."
-      >
-        <form onSubmit={handleCreateEvent} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              1. Nama Acara
-            </label>
-            <input
-              type="text"
-              required
-              value={eventTitle}
-              onChange={(e) => setEventTitle(e.target.value)}
-              placeholder="Contoh: Workshop Cloud & AI 2026"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white text-sm focus:outline-none focus:border-violet-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              2. Tanggal Pelaksanaan
-            </label>
-            <input
-              type="date"
-              required
-              value={eventDate}
-              onChange={(e) => setEventDate(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white text-sm focus:outline-none focus:border-violet-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              3. PIN Akses Panitia (6 Digit)
-            </label>
-            <input
-              type="text"
-              maxLength={6}
-              value={passcode}
-              onChange={(e) => setPasscode(e.target.value)}
-              placeholder="6 Angka Rahasia (Cth: 260426)"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white text-sm font-mono tracking-widest focus:outline-none focus:border-violet-500"
-            />
-            <span className="text-[11px] text-slate-500 mt-1 block">
-              Panitia akan diminta memasukkan PIN ini untuk membuka ruang kerja.
-            </span>
-          </div>
-
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
-            <Button variant="ghost" size="sm" type="button" onClick={() => setIsCreateOpen(false)}>
-              Batal
-            </Button>
-            <Button variant="cyan" size="md" type="submit" className="font-bold">
-              Buat & Buka Basecamp Sekarang
-            </Button>
-          </div>
-        </form>
-      </Modal>
+      />
     </div>
   );
 }

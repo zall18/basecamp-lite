@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { MessageCircle, CheckSquare, Package, Phone } from "lucide-react";
+import { MessageCircle, CheckSquare, Package, Phone, Trash2 } from "lucide-react";
 import { EventMember } from "@/types";
 import { ROLE_LABELS } from "@/lib/constants";
 import { useEventStore } from "@/lib/store/use-event-store";
@@ -11,13 +11,19 @@ interface MemberCardProps {
 }
 
 export function MemberCard({ member }: MemberCardProps) {
-  const { event } = useEventStore();
+  const { event, deleteMember } = useEventStore();
   const roleConfig = ROLE_LABELS[member.role] || ROLE_LABELS.VOLUNTEER;
 
   const activeTasks = event.tasks.filter((t) => t.assigneeId === member.id && t.status !== "DONE");
   const assignedGear = event.logistics.filter((l) => l.picId === member.id && l.status !== "RETURNED");
 
   const cleanPhone = member.phone ? member.phone.replace(/[^0-9]/g, "") : null;
+
+  const handleDelete = () => {
+    if (confirm(`Hapus panitia "${member.name}" dari direktori?`)) {
+      deleteMember(member.id);
+    }
+  };
 
   return (
     <div className="glass-card rounded-2xl p-5 border border-white/5 hover:border-violet-500/30 transition-all flex flex-col justify-between gap-4">
@@ -37,11 +43,21 @@ export function MemberCard({ member }: MemberCardProps) {
             </div>
           </div>
 
-          <span
-            className={`text-xs px-2.5 py-0.5 rounded-full font-medium border ${roleConfig.badgeClass}`}
-          >
-            {roleConfig.label}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span
+              className={`text-xs px-2.5 py-0.5 rounded-full font-medium border ${roleConfig.badgeClass}`}
+            >
+              {roleConfig.label}
+            </span>
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="p-1 rounded text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+              title="Hapus Anggota"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
         {/* Assigned duties */}

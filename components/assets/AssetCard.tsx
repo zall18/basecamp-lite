@@ -1,15 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
-import { ExternalLink, Copy, Check, Folder, FileSpreadsheet, Tv, Presentation } from "lucide-react";
+import { ExternalLink, Copy, Check, Folder, FileSpreadsheet, Tv, Presentation, Trash2 } from "lucide-react";
 import { QuickAsset } from "@/types";
 import { Button } from "@/components/ui/Button";
+import { useEventStore } from "@/lib/store/use-event-store";
 
 interface AssetCardProps {
   asset: QuickAsset;
 }
 
 export function AssetCard({ asset }: AssetCardProps) {
+  const { deleteAsset } = useEventStore();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -18,11 +20,19 @@ export function AssetCard({ asset }: AssetCardProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleDelete = () => {
+    if (confirm(`Hapus tautan "${asset.title}"?`)) {
+      deleteAsset(asset.id);
+    }
+  };
+
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case "Drive":
+      case "Drive & File":
         return <Folder className="w-5 h-5 text-amber-400" />;
       case "Form":
+      case "Formulir":
         return <FileSpreadsheet className="w-5 h-5 text-emerald-400" />;
       case "Streaming":
         return <Tv className="w-5 h-5 text-rose-400" />;
@@ -33,18 +43,29 @@ export function AssetCard({ asset }: AssetCardProps) {
 
   return (
     <div className="glass-card rounded-2xl p-4 border border-white/5 hover:border-violet-500/30 transition-all flex flex-col justify-between gap-3">
-      <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-xl bg-slate-800/80 border border-white/10 flex items-center justify-center shrink-0">
-          {getCategoryIcon(asset.category)}
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-xl bg-slate-800/80 border border-white/10 flex items-center justify-center shrink-0">
+            {getCategoryIcon(asset.category)}
+          </div>
+          <div>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-white/5">
+              {asset.category}
+            </span>
+            <h4 className="text-sm font-bold text-white mt-1 leading-snug">
+              {asset.title}
+            </h4>
+          </div>
         </div>
-        <div>
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-white/5">
-            {asset.category}
-          </span>
-          <h4 className="text-sm font-bold text-white mt-1 leading-snug">
-            {asset.title}
-          </h4>
-        </div>
+
+        <button
+          type="button"
+          onClick={handleDelete}
+          className="p-1 rounded text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+          title="Hapus Tautan"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
       </div>
 
       <div className="flex items-center gap-2 pt-3 border-t border-white/5">

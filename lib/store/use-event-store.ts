@@ -1,8 +1,20 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { EventData, ItemStatus, TaskStatus, RundownItem, SosAlert, InAppNotification } from "@/types";
+import {
+  EventData,
+  ItemStatus,
+  TaskStatus,
+  RundownItem,
+  LogisticsItem,
+  Task,
+  EventMember,
+  QuickAsset,
+  SosAlert,
+  InAppNotification,
+} from "@/types";
 import { INITIAL_DEMO_EVENT } from "@/lib/mock-data";
 import { recalculateRundownCascade } from "@/lib/utils";
+import { buildEventFromTemplate, CreateEventOptions } from "@/lib/event-templates";
 
 interface EventStoreState {
   event: EventData;
@@ -22,23 +34,42 @@ interface EventStoreState {
   markAllNotificationsRead: () => void;
   dismissToast: () => void;
   
-  // User Actions
+  // User & Event Lifecycle Actions
   unlockWorkspace: (passcode: string) => boolean;
   setUserIdentity: (name: string, role: string) => void;
   updateEventDetails: (details: Partial<EventData>) => void;
+  createNewEvent: (options: CreateEventOptions) => string;
+  resetToDemoEvent: () => void;
   
   // Rundown Actions
   adjustRundownTime: (itemId: string, minutes: number) => void;
   setActiveRundownItem: (itemId: string) => void;
   addRundownItem: (item: Omit<RundownItem, "id" | "eventId">) => void;
+  editRundownItem: (itemId: string, updates: Partial<RundownItem>) => void;
+  deleteRundownItem: (itemId: string) => void;
   
   // Logistics Actions
+  addLogisticsItem: (item: Omit<LogisticsItem, "id" | "eventId">) => void;
   updateLogisticsStatus: (itemId: string, status: ItemStatus) => void;
+  editLogisticsItem: (itemId: string, updates: Partial<LogisticsItem>) => void;
+  deleteLogisticsItem: (itemId: string) => void;
   uploadLogisticsProof: (itemId: string, photoUrl: string) => void;
   
   // Task & Nudge Actions
+  addTask: (task: Omit<Task, "id" | "eventId">) => void;
   updateTaskStatus: (taskId: string, status: TaskStatus) => void;
+  editTask: (taskId: string, updates: Partial<Task>) => void;
+  deleteTask: (taskId: string) => void;
   sendNudge: (taskId: string, senderName: string, presetLabel: string) => boolean;
+  
+  // Member Actions
+  addMember: (member: Omit<EventMember, "id" | "eventId">) => void;
+  editMember: (memberId: string, updates: Partial<EventMember>) => void;
+  deleteMember: (memberId: string) => void;
+  
+  // Asset Actions
+  addAsset: (asset: Omit<QuickAsset, "id" | "eventId">) => void;
+  deleteAsset: (assetId: string) => void;
   
   // SOS Actions
   triggerSos: (message: string, senderName: string) => void;
@@ -164,6 +195,38 @@ export const useEventStore = create<EventStoreState>()(
         }));
       },
 
+      createNewEvent: (options: CreateEventOptions) => {
+        const newEvent = buildEventFromTemplate(options);
+        const creator = newEvent.members[0];
+        const welcomeNotif: InAppNotification = {
+          id: `notif-${Date.now()}`,
+          title: `🎉 Basecamp Acara Siap!`,
+          message: `Selamat datang di Basecamp "${newEvent.title}". Semua fitur siap disesuaikan untuk hari-H.`,
+          senderName: "Sistem Basecamp",
+          timestamp: new Date().toISOString(),
+          read: false,
+          type: "rundown",
+        };
+        set({
+          event: newEvent,
+          userName: creator?.name || options.creatorName || "Ketua Pelaksana",
+          userRole: "LEAD",
+          hasUnlockedWorkspace: true,
+          notifications: [welcomeNotif],
+          activeToast: welcomeNotif,
+        });
+        return newEvent.slug;
+      },
+
+      resetToDemoEvent: () => {
+        set({
+          event: INITIAL_DEMO_EVENT,
+          userName: "Rian (Lead)",
+          userRole: "LEAD",
+          hasUnlockedWorkspace: true,
+        });
+      },
+
       adjustRundownTime: (itemId: string, minutes: number) => {
         set((state) => {
           const updatedRundowns = recalculateRundownCascade(state.event.rundowns, itemId, minutes);
@@ -207,6 +270,47 @@ export const useEventStore = create<EventStoreState>()(
         });
       },
 
+      editRundownItem: (itemId, updates) => {
+        set((state) => ({
+          event: {
+            ...state.event,
+            rundowns: state.event.rundowns.map((r) =>
+              r.id === itemId ? { ...r, ...updates } : r
+            ),
+            updatedAt: new Date().toISOString(),
+          },
+        }));
+      },
+
+      deleteRundownItem: (itemId) => {
+        set((state) => ({
+          event: {
+            ...state.event,
+            rundowns: state.event.rundowns
+              .filter((r) => r.id !== itemId)
+              .map((r, idx) => ({ ...r, order: idx + 1 })),
+            updatedAt: new Date().toISOString(),
+          },
+        }));
+      },
+
+      addLogisticsItem: (item) => {
+        set((state) => {
+          const newItem: LogisticsItem = {
+            ...item,
+            id: `log-${Date.now()}`,
+            eventId: state.event.id,
+          };
+          return {
+            event: {
+              ...state.event,
+              logistics: [newItem, ...state.event.logistics],
+              updatedAt: new Date().toISOString(),
+            },
+          };
+        });
+      },
+
       updateLogisticsStatus: (itemId: string, status: ItemStatus) => {
         set((state) => ({
           event: {
@@ -214,6 +318,28 @@ export const useEventStore = create<EventStoreState>()(
             logistics: state.event.logistics.map((item) =>
               item.id === itemId ? { ...item, status } : item
             ),
+            updatedAt: new Date().toISOString(),
+          },
+        }));
+      },
+
+      editLogisticsItem: (itemId, updates) => {
+        set((state) => ({
+          event: {
+            ...state.event,
+            logistics: state.event.logistics.map((l) =>
+              l.id === itemId ? { ...l, ...updates } : l
+            ),
+            updatedAt: new Date().toISOString(),
+          },
+        }));
+      },
+
+      deleteLogisticsItem: (itemId) => {
+        set((state) => ({
+          event: {
+            ...state.event,
+            logistics: state.event.logistics.filter((l) => l.id !== itemId),
             updatedAt: new Date().toISOString(),
           },
         }));
@@ -231,6 +357,23 @@ export const useEventStore = create<EventStoreState>()(
         }));
       },
 
+      addTask: (task) => {
+        set((state) => {
+          const newTask: Task = {
+            ...task,
+            id: `tsk-${Date.now()}`,
+            eventId: state.event.id,
+          };
+          return {
+            event: {
+              ...state.event,
+              tasks: [newTask, ...state.event.tasks],
+              updatedAt: new Date().toISOString(),
+            },
+          };
+        });
+      },
+
       updateTaskStatus: (taskId: string, status: TaskStatus) => {
         set((state) => ({
           event: {
@@ -238,6 +381,94 @@ export const useEventStore = create<EventStoreState>()(
             tasks: state.event.tasks.map((task) =>
               task.id === taskId ? { ...task, status } : task
             ),
+            updatedAt: new Date().toISOString(),
+          },
+        }));
+      },
+
+      editTask: (taskId, updates) => {
+        set((state) => ({
+          event: {
+            ...state.event,
+            tasks: state.event.tasks.map((t) =>
+              t.id === taskId ? { ...t, ...updates } : t
+            ),
+            updatedAt: new Date().toISOString(),
+          },
+        }));
+      },
+
+      deleteTask: (taskId) => {
+        set((state) => ({
+          event: {
+            ...state.event,
+            tasks: state.event.tasks.filter((t) => t.id !== taskId),
+            updatedAt: new Date().toISOString(),
+          },
+        }));
+      },
+
+      addMember: (member) => {
+        set((state) => {
+          const newMember: EventMember = {
+            ...member,
+            id: `mbr-${Date.now()}`,
+            eventId: state.event.id,
+          };
+          return {
+            event: {
+              ...state.event,
+              members: [...state.event.members, newMember],
+              updatedAt: new Date().toISOString(),
+            },
+          };
+        });
+      },
+
+      editMember: (memberId, updates) => {
+        set((state) => ({
+          event: {
+            ...state.event,
+            members: state.event.members.map((m) =>
+              m.id === memberId ? { ...m, ...updates } : m
+            ),
+            updatedAt: new Date().toISOString(),
+          },
+        }));
+      },
+
+      deleteMember: (memberId) => {
+        set((state) => ({
+          event: {
+            ...state.event,
+            members: state.event.members.filter((m) => m.id !== memberId),
+            updatedAt: new Date().toISOString(),
+          },
+        }));
+      },
+
+      addAsset: (asset) => {
+        set((state) => {
+          const newAsset: QuickAsset = {
+            ...asset,
+            id: `ast-${Date.now()}`,
+            eventId: state.event.id,
+          };
+          return {
+            event: {
+              ...state.event,
+              assets: [...state.event.assets, newAsset],
+              updatedAt: new Date().toISOString(),
+            },
+          };
+        });
+      },
+
+      deleteAsset: (assetId) => {
+        set((state) => ({
+          event: {
+            ...state.event,
+            assets: state.event.assets.filter((a) => a.id !== assetId),
             updatedAt: new Date().toISOString(),
           },
         }));

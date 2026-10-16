@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Coffee, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { Coffee, CheckCircle, Clock, AlertCircle, Trash2 } from "lucide-react";
 import { Task, TaskStatus } from "@/types";
 import { TASK_STATUS_LABELS, ROLE_LABELS } from "@/lib/constants";
 import { useEventStore } from "@/lib/store/use-event-store";
@@ -13,12 +13,18 @@ interface TaskCardProps {
 }
 
 export function TaskCard({ task }: TaskCardProps) {
-  const { event, updateTaskStatus } = useEventStore();
+  const { event, updateTaskStatus, deleteTask } = useEventStore();
   const [isNudgeOpen, setIsNudgeOpen] = useState(false);
 
   const assignee = event.members.find((m) => m.id === task.assigneeId);
   const statusInfo = TASK_STATUS_LABELS[task.status] || TASK_STATUS_LABELS.TODO;
   const roleInfo = assignee ? ROLE_LABELS[assignee.role] : null;
+
+  const handleDelete = () => {
+    if (confirm(`Hapus tugas "${task.title}"?`)) {
+      deleteTask(task.id);
+    }
+  };
 
   return (
     <>
@@ -31,11 +37,21 @@ export function TaskCard({ task }: TaskCardProps) {
               {statusInfo.label}
             </span>
 
-            {assignee && (
-              <span className="text-[11px] text-slate-300 font-medium">
-                {assignee.name}
-              </span>
-            )}
+            <div className="flex items-center gap-1.5">
+              {assignee && (
+                <span className="text-[11px] text-slate-300 font-medium">
+                  {assignee.name}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="p-1 rounded text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                title="Hapus Tugas"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
 
           <h4 className="text-sm font-bold text-white mt-2 leading-snug">

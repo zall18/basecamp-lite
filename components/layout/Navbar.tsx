@@ -22,6 +22,8 @@ import {
   ChevronDown,
   Sparkles,
   Lock,
+  Plus,
+  RotateCcw,
 } from "lucide-react";
 import { useEventStore } from "@/lib/store/use-event-store";
 import { formatDate } from "@/lib/utils";
@@ -30,6 +32,7 @@ import { RoleType } from "@/types";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { SosModal } from "@/components/event/SosModal";
+import { CreateEventModal } from "@/components/event/CreateEventModal";
 
 const SIMULATED_PROFILES: { name: string; role: RoleType; title: string; desc: string }[] = [
   {
@@ -77,6 +80,7 @@ export function Navbar() {
   const [isSosOpen, setIsSosOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const permissions = getRolePermissions(userRole);
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -264,6 +268,18 @@ export function Navbar() {
                 </Link>
               )}
 
+              {/* Buat Acara Baru Button */}
+              <Button
+                variant="cyan"
+                size="sm"
+                onClick={() => setIsCreateModalOpen(true)}
+                className="hidden md:inline-flex text-xs font-bold gap-1 shadow-cyan-500/20"
+                title="Buat acara baru untuk kegiatan Anda"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Acara Baru</span>
+              </Button>
+
               {/* RBAC Role Switcher Chip */}
               <button
                 type="button"
@@ -387,6 +403,12 @@ export function Navbar() {
           </div>
         </div>
       </Modal>
+
+      {/* Create Event Modal */}
+      <CreateEventModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      />
     </>
   );
 }
