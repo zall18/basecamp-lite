@@ -5,6 +5,7 @@ import { FolderOpen, Plus, Wifi, ExternalLink } from "lucide-react";
 import { useEventStore } from "@/lib/store/use-event-store";
 import { WifiCredentialCard } from "@/components/assets/WifiCredentialCard";
 import { AssetCard } from "@/components/assets/AssetCard";
+import { FaqManager } from "@/components/event/FaqManager";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 
@@ -43,10 +44,10 @@ export default function AssetsPage() {
         <div>
           <h2 className="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
             <FolderOpen className="w-5 h-5 text-cyan-400" />
-            <span>Quick Asset Hub & Pinned Cards</span>
+            <span>Asset Hub, Wi-Fi & Editor FAQ Publik</span>
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Tautan operasional krusial yang bebas dari tenggelam di chat WhatsApp: Drive, Sheet Presensi, Slido Q&A, dan Kredensial Wi-Fi.
+            Tautan operasional panitia, Kredensial Wi-Fi venue, dan Editor FAQ yang tayang langsung di halaman peserta publik.
           </p>
         </div>
 
@@ -75,6 +76,10 @@ export default function AssetsPage() {
           ))}
         </div>
       </div>
+
+      {/* FAQ Editor for Public Attendee Page */}
+      <FaqManager />
+
 
       {/* Modal Add Quick Asset */}
       <Modal

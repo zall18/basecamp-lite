@@ -64,6 +64,7 @@ export function buildEventFromTemplate(options: CreateEventOptions): EventData {
       rundowns: [],
       assets: [],
       sosAlerts: [],
+      faqs: [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -254,6 +255,20 @@ export function buildEventFromTemplate(options: CreateEventOptions): EventData {
         },
       ],
       sosAlerts: [],
+      faqs: [
+        {
+          id: `faq-${Date.now()}-1`,
+          question: "Apakah peserta wajib membawa laptop sendiri?",
+          answer: "Ya, karena sesi hands-on praktikal memerlukan laptop dan text editor masing-masing.",
+          order: 1,
+        },
+        {
+          id: `faq-${Date.now()}-2`,
+          question: "Kapan sertifikat kehadiran dibagikan?",
+          answer: "Sertifikat digital akan dikirimkan via email maksimal H+2 setelah mengisi form feedback.",
+          order: 2,
+        },
+      ],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -396,6 +411,14 @@ export function buildEventFromTemplate(options: CreateEventOptions): EventData {
         },
       ],
       sosAlerts: [],
+      faqs: [
+        {
+          id: `faq-${Date.now()}-1`,
+          question: "Apakah ada dresscode khusus untuk acara gathering?",
+          answer: "Dresscode casual / bebas rapi atau memakai jaket/kaos angkatan komunitas.",
+          order: 1,
+        },
+      ],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -532,6 +555,20 @@ export function buildEventFromTemplate(options: CreateEventOptions): EventData {
       },
     ],
     sosAlerts: [],
+    faqs: [
+      {
+        id: `faq-${Date.now()}-1`,
+        question: "Apakah peserta boleh menggunakan boilerplate / open-source library?",
+        answer: "Boleh! Namun baris kode inti produk harus dikembangkan selama masa kompetisi berlangsung.",
+        order: 1,
+      },
+      {
+        id: `faq-${Date.now()}-2`,
+        question: "Berapa menit durasi pitching demo di hadapan juri?",
+        answer: "Setiap tim top 5 mendapat alokasi 3 menit presentasi demo dan 2 menit sesi tanya jawab dewan juri.",
+        order: 2,
+      },
+    ],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };

@@ -9,6 +9,16 @@
   --accent-cyan: #06B6D4;
 }
 
+[data-theme="light"],
+.light {
+  --background: #F8FAFC;
+  --foreground: #0F172A;
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --card-border: rgba(226, 232, 240, 0.85);
+  --accent-violet: #7C3AED;
+  --accent-cyan: #0891B2;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -27,9 +37,10 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* Glassmorphism Classes */
+/* Glassmorphism Classes (Dark Mode Default) */
 .glass-panel {
   background: rgba(22, 27, 38, 0.7);
   backdrop-filter: blur(16px);
@@ -77,4 +88,147 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
+}
+
+/* ==========================================================================
+   LIGHT THEME OVERRIDES (Clean, Crisp, Modern Slate & Violet/Cyan Accents)
+   ========================================================================== */
+
+[data-theme="light"],
+.light {
+  color-scheme: light;
+}
+
+[data-theme="light"] body,
+[data-theme="light"] .bg-\[\#0B0D13\] {
+  background-color: #F8FAFC !important;
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .glass-panel {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(226, 232, 240, 0.9) !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+}
+
+[data-theme="light"] .glass-card {
+  background: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme="light"] .glass-card:hover {
+  background: #FFFFFF !important;
+  border-color: rgba(124, 58, 237, 0.4) !important;
+  box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.08), 0 0 15px rgba(124, 58, 237, 0.05);
+}
+
+/* Slate background replacements */
+[data-theme="light"] .bg-slate-900,
+[data-theme="light"] .bg-slate-900\/60,
+[data-theme="light"] .bg-slate-900\/70,
+[data-theme="light"] .bg-slate-900\/80,
+[data-theme="light"] .bg-slate-900\/90 {
+  background-color: #F1F5F9 !important;
+  border-color: #E2E8F0 !important;
+}
+
+[data-theme="light"] .bg-slate-950,
+[data-theme="light"] .bg-slate-950\/40,
+[data-theme="light"] .bg-slate-950\/60,
+[data-theme="light"] .bg-slate-950\/80 {
+  background-color: #E2E8F0 !important;
+}
+
+[data-theme="light"] .bg-slate-800 {
+  background-color: #E2E8F0 !important;
+  color: #1E293B !important;
+}
+
+/* Text adjustments for light mode contrast */
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4,
+[data-theme="light"] .text-white {
+  color: #0F172A;
+}
+
+[data-theme="light"] .text-slate-100 {
+  color: #1E293B !important;
+}
+
+[data-theme="light"] .text-slate-200 {
+  color: #334155 !important;
+}
+
+[data-theme="light"] .text-slate-300 {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .text-slate-400 {
+  color: #64748B !important;
+}
+
+[data-theme="light"] .text-slate-500 {
+  color: #64748B !important;
+}
+
+/* Ensure buttons with solid colored backgrounds retain clean white text */
+[data-theme="light"] button.bg-violet-600,
+[data-theme="light"] button.bg-cyan-500,
+[data-theme="light"] button.bg-cyan-600,
+[data-theme="light"] button.bg-rose-600,
+[data-theme="light"] button.bg-emerald-600,
+[data-theme="light"] .bg-violet-600 .text-white,
+[data-theme="light"] .bg-cyan-500 .text-white,
+[data-theme="light"] .bg-cyan-600 .text-white,
+[data-theme="light"] .bg-rose-600 .text-white,
+[data-theme="light"] .bg-emerald-600 .text-white,
+[data-theme="light"] [class*="bg-violet-600"] span,
+[data-theme="light"] [class*="bg-cyan-600"] span,
+[data-theme="light"] [class*="bg-cyan-500"] span,
+[data-theme="light"] [class*="bg-rose-600"] span,
+[data-theme="light"] [class*="bg-emerald-600"] span {
+  color: #FFFFFF !important;
+}
+
+/* Borders in light mode */
+[data-theme="light"] .border-white\/5,
+[data-theme="light"] .border-white\/10,
+[data-theme="light"] .border-white\/20 {
+  border-color: rgba(226, 232, 240, 0.9) !important;
+}
+
+/* Form inputs & selects in light mode */
+[data-theme="light"] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme="light"] textarea,
+[data-theme="light"] select {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder {
+  color: #94A3B8 !important;
+}
+
+/* Modals in light mode */
+[data-theme="light"] .fixed.inset-0 .glass-panel,
+[data-theme="light"] .fixed.inset-0 [class*="glass"] {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.2) !important;
+}
+
+/* Light mode scrollbar */
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.3);
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.5);
 }

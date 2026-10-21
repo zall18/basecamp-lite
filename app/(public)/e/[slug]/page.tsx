@@ -17,6 +17,7 @@ import { useEventStore } from "@/lib/store/use-event-store";
 import { formatDate, formatTime } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { NowPlayingBar } from "@/components/rundown/NowPlayingBar";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export default function PublicEventHubPage() {
   const { event } = useEventStore();
@@ -48,6 +49,7 @@ export default function PublicEventHubPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
               Live Synced
@@ -179,27 +181,42 @@ export default function PublicEventHubPage() {
 
         {/* FAQ Section */}
         <div className="glass-card rounded-2xl p-6 border border-white/10 space-y-4">
-          <div className="flex items-center gap-2 mb-2">
-            <HelpCircle className="w-5 h-5 text-cyan-400" />
-            <h3 className="text-base font-bold text-white">Informasi & FAQ Peserta</h3>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <HelpCircle className="w-5 h-5 text-cyan-400" />
+              <h3 className="text-base font-bold text-white">Informasi & FAQ Peserta</h3>
+            </div>
+            <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-cyan-950/40 text-cyan-300 border border-cyan-500/20">
+              {(event.faqs || []).length} Informasi
+            </span>
           </div>
 
           <div className="space-y-3 text-xs text-slate-300">
-            <div className="p-3 rounded-xl bg-slate-900/60 border border-white/5">
-              <p className="font-bold text-white">Apakah ada sertifikat untuk peserta?</p>
-              <p className="text-slate-400 mt-1">
-                Ya! Tautan klaim e-sertifikat akan dirilis panitia melalui link Google Form di akhir sesi acara.
-              </p>
-            </div>
+            {(event.faqs || []).map((faq, index) => (
+              <div
+                key={faq.id}
+                className="p-3.5 rounded-xl bg-slate-900/60 border border-white/5 space-y-1.5"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/30 font-bold">
+                    Q{index + 1}
+                  </span>
+                  <p className="font-bold text-white leading-snug">{faq.question}</p>
+                </div>
+                <p className="text-slate-400 pl-6 leading-relaxed whitespace-pre-line">
+                  {faq.answer}
+                </p>
+              </div>
+            ))}
 
-            <div className="p-3 rounded-xl bg-slate-900/60 border border-white/5">
-              <p className="font-bold text-white">Bagaimana cara mengajukan pertanyaan pada sesi Q&A?</p>
-              <p className="text-slate-400 mt-1">
-                Silakan akses room Slido resmi acara melalui link atau scan QR yang ditampilkan di layar panggung.
-              </p>
-            </div>
+            {(!event.faqs || event.faqs.length === 0) && (
+              <div className="p-4 rounded-xl bg-slate-900/40 border border-white/5 text-center text-slate-400">
+                <p>Belum ada informasi FAQ tambahan yang dipublikasikan panitia.</p>
+              </div>
+            )}
           </div>
         </div>
+
       </main>
 
       {/* Footer */}

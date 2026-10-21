@@ -236,6 +236,27 @@ export const INITIAL_DEMO_EVENT: EventData = {
       createdAt: "2026-10-15T09:20:00.000Z",
     },
   ],
+  faqs: [
+    {
+      id: "faq-1",
+      question: "Apakah ada e-sertifikat untuk seluruh peserta yang hadir?",
+      answer: "Ya! Tautan klaim e-sertifikat resmi akan dibagikan panitia melalui link Google Form di akhir sesi penutupan acara.",
+      order: 1,
+    },
+    {
+      id: "faq-2",
+      question: "Bagaimana cara mengajukan pertanyaan pada sesi Q&A narasumber?",
+      answer: "Silakan akses room Slido resmi acara melalui tautan pada Quick Assets di atas atau scan QR di layar auditorium.",
+      order: 2,
+    },
+    {
+      id: "faq-3",
+      question: "Apakah disediakan Wi-Fi gratis dan colokan charger di area venue?",
+      answer: "Tentu! SSID dan Password Wi-Fi tertera pada bagian atas halaman ini. Stop kontak tersedia di setiap baris meja auditorium.",
+      order: 3,
+    },
+  ],
   createdAt: "2026-10-01T00:00:00.000Z",
   updatedAt: "2026-10-15T09:20:00.000Z",
 };
+

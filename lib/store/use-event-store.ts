@@ -11,6 +11,7 @@ import {
   QuickAsset,
   SosAlert,
   InAppNotification,
+  FaqItem,
 } from "@/types";
 import { INITIAL_DEMO_EVENT } from "@/lib/mock-data";
 import { recalculateRundownCascade } from "@/lib/utils";
@@ -21,6 +22,11 @@ interface EventStoreState {
   userRole: string;
   userName: string;
   hasUnlockedWorkspace: boolean;
+  
+  // Theme
+  theme: "dark" | "light";
+  toggleTheme: () => void;
+  setTheme: (theme: "dark" | "light") => void;
   
   // Realtime & Auto-Sync
   autoSyncRealtime: boolean;
@@ -74,6 +80,11 @@ interface EventStoreState {
   // SOS Actions
   triggerSos: (message: string, senderName: string) => void;
   resolveSos: (alertId: string) => void;
+
+  // FAQ Actions
+  addFaq: (faq: Omit<FaqItem, "id">) => void;
+  editFaq: (faqId: string, updates: Partial<FaqItem>) => void;
+  deleteFaq: (faqId: string) => void;
 }
 
 export const useEventStore = create<EventStoreState>()(
@@ -84,6 +95,15 @@ export const useEventStore = create<EventStoreState>()(
       userName: "Rian (Lead)",
       hasUnlockedWorkspace: true,
       autoSyncRealtime: true,
+      theme: "dark",
+
+      toggleTheme: () => {
+        set((state) => ({ theme: state.theme === "dark" ? "light" : "dark" }));
+      },
+
+      setTheme: (theme) => {
+        set({ theme });
+      },
 
       notifications: [
         {
@@ -350,7 +370,16 @@ export const useEventStore = create<EventStoreState>()(
           event: {
             ...state.event,
             logistics: state.event.logistics.map((item) =>
-              item.id === itemId ? { ...item, photoProof: photoUrl } : item
+              item.id === itemId
+                ? {
+                    ...item,
+                    photoProof: photoUrl,
+                    status:
+                      item.status === "NOT_PICKED_UP" || item.status === "ON_THE_WAY"
+                        ? "DELIVERED"
+                        : item.status,
+                  }
+                : item
             ),
             updatedAt: new Date().toISOString(),
           },
@@ -563,6 +592,44 @@ export const useEventStore = create<EventStoreState>()(
           },
         }));
       },
+
+      addFaq: (faq) => {
+        const newFaq: FaqItem = {
+          ...faq,
+          id: `faq-${Date.now()}`,
+          order: ((get().event.faqs || []).length) + 1,
+        };
+        set((state) => ({
+          event: {
+            ...state.event,
+            faqs: [...(state.event.faqs || []), newFaq],
+            updatedAt: new Date().toISOString(),
+          },
+        }));
+      },
+
+      editFaq: (faqId, updates) => {
+        set((state) => ({
+          event: {
+            ...state.event,
+            faqs: (state.event.faqs || []).map((f) =>
+              f.id === faqId ? { ...f, ...updates } : f
+            ),
+            updatedAt: new Date().toISOString(),
+          },
+        }));
+      },
+
+      deleteFaq: (faqId) => {
+        set((state) => ({
+          event: {
+            ...state.event,
+            faqs: (state.event.faqs || []).filter((f) => f.id !== faqId),
+            updatedAt: new Date().toISOString(),
+          },
+        }));
+      },
+
     }),
     {
       name: "basecamp-lite-event-store",

@@ -33,6 +33,7 @@ import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { SosModal } from "@/components/event/SosModal";
 import { CreateEventModal } from "@/components/event/CreateEventModal";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 const SIMULATED_PROFILES: { name: string; role: RoleType; title: string; desc: string }[] = [
   {
@@ -131,6 +132,9 @@ export function Navbar() {
 
             {/* Right: Actions */}
             <div className="flex items-center gap-2">
+              {/* Theme Switcher */}
+              <ThemeToggle />
+
               {/* Notification Center Popover Trigger */}
               <div className="relative">
                 <button

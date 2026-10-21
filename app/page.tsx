@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { CreateEventModal } from "@/components/event/CreateEventModal";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { useEventStore } from "@/lib/store/use-event-store";
 
 export default function LandingPage() {
@@ -48,6 +49,7 @@ export default function LandingPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <Link href={`/workspace/${event.slug}`}>
               <Button variant="ghost" size="sm" className="text-xs">
                 Coba Demo Acara

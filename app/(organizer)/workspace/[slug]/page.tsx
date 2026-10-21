@@ -161,7 +161,9 @@ export default function WorkspaceOverviewPage() {
             >
               <Package className="w-5 h-5 text-pink-400 mx-auto mb-1.5 group-hover:scale-110 transition-transform" />
               <span className="text-xs font-bold text-white block">Radar Logistik</span>
-              <span className="text-[10px] text-slate-400">{event.logistics.length} Barang</span>
+              <span className="text-[10px] text-slate-400">
+                {event.logistics.length} Barang • {event.logistics.filter((l) => Boolean(l.photoProof)).length} Bukti
+              </span>
             </Link>
 
             <Link
@@ -169,8 +171,10 @@ export default function WorkspaceOverviewPage() {
               className="glass-card p-3.5 rounded-xl border border-white/5 hover:border-cyan-500/40 text-center group cursor-pointer"
             >
               <FolderOpen className="w-5 h-5 text-cyan-400 mx-auto mb-1.5 group-hover:scale-110 transition-transform" />
-              <span className="text-xs font-bold text-white block">Pinned Links</span>
-              <span className="text-[10px] text-slate-400">{event.assets.length} Tautan</span>
+              <span className="text-xs font-bold text-white block">Assets & FAQ</span>
+              <span className="text-[10px] text-slate-400">
+                {(event.faqs || []).length} FAQ • {event.assets.length} Link
+              </span>
             </Link>
 
             <Link

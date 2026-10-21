@@ -85,6 +85,13 @@ export interface InAppNotification {
   type: "nudge" | "sos" | "rundown" | "logistics";
 }
 
+export interface FaqItem {
+  id: string;
+  question: string;
+  answer: string;
+  order?: number;
+}
+
 export interface EventData {
   id: string;
   slug: string;
@@ -102,6 +109,8 @@ export interface EventData {
   rundowns: RundownItem[];
   assets: QuickAsset[];
   sosAlerts: SosAlert[];
+  faqs?: FaqItem[];
   createdAt: Date | string;
   updatedAt: Date | string;
 }
+
